@@ -30,7 +30,10 @@ migrate_working_dir/
 .packages
 .pub-cache/
 .pub/
+
+# Keep build/web for Vercel deployment
 /build/
+!/build/web/
 
 # Symbolication related
 app.*.symbols
