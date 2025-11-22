@@ -11,11 +11,11 @@ class HomeScreen extends HookConsumerWidget {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
-              Colors.purple.shade600,
-              Colors.blue.shade600,
+              Colors.blue.shade50,
+              Colors.indigo.shade100,
             ],
           ),
         ),
@@ -26,32 +26,46 @@ class HomeScreen extends HookConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    '🐾',
-                    style: TextStyle(fontSize: 80),
-                  ),
-                  const SizedBox(height: 40),
-                  const Text(
-                    'あなたにピッタリの\nペットを見つけよう',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                      height: 1.4,
+                  // アイコン
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade100,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Icon(
+                      Icons.business_center,
+                      size: 40,
+                      color: Colors.blue.shade600,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
+                  
+                  // タイトル
                   const Text(
-                    'いくつかの質問に答えるだけで\nあなたに最適なペットを提案します',
+                    '就活スワイプマッチ',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  // 説明文
+                  Text(
+                    '直感で「Yes / No」を選ぶだけ。\nあなたの価値観に合う企業が見つかります。',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white70,
                       fontSize: 16,
+                      color: Colors.grey.shade600,
                       height: 1.6,
                     ),
                   ),
-                  const SizedBox(height: 60),
+                  const SizedBox(height: 48),
+                  
+                  // 開始ボタン
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).push(
@@ -61,25 +75,45 @@ class HomeScreen extends HookConsumerWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.purple.shade600,
+                      backgroundColor: Colors.blue.shade600,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 60,
                         vertical: 20,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 8,
+                      elevation: 4,
                     ),
-                    child: const Text(
-                      '開始',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          '診断をスタート',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: 20,
+                        ),
+                      ],
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  
+                  // 所要時間
+Text(
+  '所要時間：約3分 / 全32問',
+  style: TextStyle(
+    fontSize: 12,
+    color: Colors.grey.shade400,
+  ),
+),
                 ],
               ),
             ),

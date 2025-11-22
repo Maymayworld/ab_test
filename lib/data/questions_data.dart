@@ -1,64 +1,36 @@
 import '../models/question.dart';
 
 final List<Question> questions = [
-  const Question(
-    id: 'q1',
-    text: '一緒に遊ぶのが好き?',
-  ),
-  const Question(
-    id: 'q2',
-    text: 'かわいい見た目が大事?',
-  ),
-  const Question(
-    id: 'q3',
-    text: '毛がフワフワしてるのが好き?',
-  ),
-  const Question(
-    id: 'q4',
-    text: '散歩に連れて行きたい?',
-  ),
-  const Question(
-    id: 'q5',
-    text: '鳴き声を聞きたい?',
-  ),
-  const Question(
-    id: 'q6',
-    text: '賢くて訓練できる動物が好き?',
-  ),
-  const Question(
-    id: 'q7',
-    text: '小さくて持ち運べるサイズがいい?',
-  ),
-  const Question(
-    id: 'q8',
-    text: '独立心が強い性格が好き?',
-  ),
-  const Question(
-    id: 'q9',
-    text: 'エキゾチックな動物に惹かれる?',
-  ),
-  const Question(
-    id: 'q10',
-    text: '水辺で遊ぶ姿が見たい?',
-  ),
-  const Question(
-    id: 'q11',
-    text: '夜行性でも気にならない?',
-  ),
-  const Question(
-    id: 'q12',
-    text: '忠実で飼い主を慕ってほしい?',
-  ),
-  const Question(
-    id: 'q13',
-    text: '手間がかからない方がいい?',
-  ),
-  const Question(
-    id: 'q14',
-    text: '活発で元気な性格が好き?',
-  ),
-  const Question(
-    id: 'q15',
-    text: '珍しい動物を飼いたい?',
-  ),
+  const Question(id: 'Q01', text: 'リモート中心の働き方に魅力を感じる'),
+  const Question(id: 'Q02', text: '自分のペースで進められる業務環境が合う'),
+  const Question(id: 'Q03', text: 'フルフレックス（コアタイムなし）の働き方が良い'),
+  const Question(id: 'Q04', text: '週2〜3日の出社なら許容できる'),
+  const Question(id: 'Q05', text: '仕事は人生の中心にある方が良い'),
+  const Question(id: 'Q06', text: '定時退社より成長できる環境を優先したい'),
+  const Question(id: 'Q07', text: '休日は仕事のことを忘れてリフレッシュしたい'),
+  const Question(id: 'Q08', text: '忙しい環境の方が充実感を感じる'),
+  const Question(id: 'Q09', text: '給与・待遇の良さを重視したい'),
+  const Question(id: 'Q10', text: '給与が平均でも好きな仕事を選びたい'),
+  const Question(id: 'Q11', text: '福利厚生の充実を重視したい'),
+  const Question(id: 'Q12', text: 'お金よりも仕事のやりがいがモチベーションになる'),
+  const Question(id: 'Q13', text: '急成長企業でチャレンジしたい'),
+  const Question(id: 'Q14', text: '安定した会社で働きたい'),
+  const Question(id: 'Q15', text: '変化が多い環境に魅力を感じる'),
+  const Question(id: 'Q16', text: '多少リスクがあっても挑戦したい'),
+  const Question(id: 'Q17', text: '革新的で変化を歓迎する社風が好き'),
+  const Question(id: 'Q18', text: 'フラットな組織が働きやすい'),
+  const Question(id: 'Q19', text: 'チームワークを重視する組織が良い'),
+  const Question(id: 'Q20', text: '実力主義の環境の方が向いている'),
+  const Question(id: 'Q21', text: '自由でカジュアルな雰囲気が好き'),
+  const Question(id: 'Q22', text: '大企業で働きたい'),
+  const Question(id: 'Q23', text: 'ベンチャーの少数精鋭環境を選びたい'),
+  const Question(id: 'Q24', text: '研修が整った環境が良い'),
+  const Question(id: 'Q25', text: '有名企業/大企業のネームバリューを重視したい'),
+  const Question(id: 'Q26', text: '海外案件や駐在に興味がある'),
+  const Question(id: 'Q27', text: '社会課題の解決に関わる仕事に興味がある'),
+  const Question(id: 'Q28', text: '顧客に深く寄り添う仕事をしたい'),
+  const Question(id: 'Q29', text: '裁量が大きい環境で働きたい'),
+  const Question(id: 'Q30', text: 'プロダクト開発/データ領域に関わりたい'),
+  const Question(id: 'Q31', text: '営業/コンサル/CSなど対人業務に強みがある'),
+  const Question(id: 'Q32', text: 'クリエイティブ（デザイン/編集/映像）に関わりたい'),
 ];

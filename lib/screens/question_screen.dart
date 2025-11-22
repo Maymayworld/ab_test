@@ -16,16 +16,10 @@ class QuestionScreen extends HookConsumerWidget {
     final currentIndex = useState(0);
     final isCompleted = useState(false);
 
+    // プログレス計算
+    final progress = (currentIndex.value / questions.length) * 100;
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      extendBodyBehindAppBar: true,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -91,48 +85,105 @@ class QuestionScreen extends HookConsumerWidget {
                     ],
                   ),
                 )
-              : Center(
-                  child: SizedBox(
-                    height: 380, // カード高さ300 + マージン80
-                    child: AppinioSwiper(
-                      controller: controller,
-                      cardCount: questions.length,
-                      onSwipeEnd: (previousIndex, targetIndex, activity) {
-                        final question = questions[previousIndex];
-                        final answers = ref.read(answersProvider.notifier);
-
-                        if (activity.direction == AxisDirection.right) {
-                          // 右スワイプ = はい (1)
-                          answers.update((state) => {
-                                ...state,
-                                question.id: 1,
-                              });
-                        } else if (activity.direction == AxisDirection.left) {
-                          // 左スワイプ = いいえ (0)
-                          answers.update((state) => {
-                                ...state,
-                                question.id: 0,
-                              });
-                        }
-                        // 上下のスワイプはスキップ(何も記録しない)
-
-                        // 最後の質問をスワイプした場合
-                        if (previousIndex == questions.length - 1) {
-                          // 全ての質問が終了
-                          isCompleted.value = true;
-                        } else if (targetIndex != null) {
-                          currentIndex.value = targetIndex;
-                        }
-                      },
-                      cardBuilder: (context, index) {
-                        return SwipeCard(
-                          question: questions[index].text,
-                          questionNumber: index + 1,
-                          totalQuestions: questions.length,
-                        );
-                      },
+              : Column(
+                  children: [
+                    // プログレスバー
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                      child: Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: progress / 100,
+                              minHeight: 8,
+                              backgroundColor: Colors.white.withOpacity(0.3),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Q${currentIndex.value + 1}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                              Text(
+                                '${questions.length}問',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    
+                    // スワイプエリア
+                    Expanded(
+                      child: Center(
+                        child: SizedBox(
+                          height: 380,
+                          child: AppinioSwiper(
+                            controller: controller,
+                            cardCount: questions.length,
+                            onSwipeEnd: (previousIndex, targetIndex, activity) {
+                              final question = questions[previousIndex];
+                              final answers = ref.read(answersProvider.notifier);
+
+                              if (activity.direction == AxisDirection.right) {
+                                answers.update((state) => {
+                                      ...state,
+                                      question.id: 1,
+                                    });
+                              } else if (activity.direction == AxisDirection.left) {
+                                answers.update((state) => {
+                                      ...state,
+                                      question.id: 0,
+                                    });
+                              }
+
+                              if (previousIndex == questions.length - 1) {
+                                isCompleted.value = true;
+                              } else if (targetIndex != null) {
+                                currentIndex.value = targetIndex;
+                              }
+                            },
+                            cardBuilder: (context, index) {
+                              return SwipeCard(
+                                question: questions[index].text,
+                                questionNumber: index + 1,
+                                totalQuestions: questions.length,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    
+                    // ヒントテキスト
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 32),
+                      child: Text(
+                        '直感でスワイプしてください',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
         ),
       ),

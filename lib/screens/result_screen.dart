@@ -1,264 +1,465 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../data/animals_data.dart';
-import '../models/animal.dart';
+import '../data/companies_data.dart';
+import '../models/company.dart';
 import '../providers/answer_provider.dart';
+import 'home_screen.dart';
 
 class ResultScreen extends HookConsumerWidget {
   const ResultScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAnswers = ref.watch(answersProvider);
+    final userTags = ref.watch(userTagsProvider);
+
+    // タグ名の日本語マップ
+    final tagNameMap = {
+  // WorkStyle
+  'remote_high': 'リモート推奨',
+  'hybrid': 'ハイブリッド',
+  'on_site': '現場重視',
+  'flex_free': 'フルフレックス',
+  'coretime': 'コアタイム有',
+  'structured': '構造化された環境',
+  
+  // Value
+  'work_priority': '仕事優先',
+  'worklife_balance': 'ワークライフバランス',
+  'growth_priority': '成長重視',
+  'speed': 'スピード重視',
+  'calm': '落ち着いた環境',
+  
+  // Compensation
+  'high': '高給与',
+  'mid': '平均給与',
+  'passion': 'やりがい重視',
+  'income_priority': '収入重視',
+  'benefits_strong': '福利厚生充実',
+  'minimal_benefits': '最低限の福利厚生',
+  
+  // Phase
+  'growth': '急成長',
+  'stability': '安定',
+  'challenge': '挑戦',
+  'early': '創業期',
+  'public': '上場企業',
+  
+  // Culture
+  'innovative': '革新的',
+  'conservative': '保守的',
+  'flat': 'フラット組織',
+  'hierarchy': '階層型組織',
+  'teamwork': 'チームワーク',
+  'individual': '個人主義',
+  'merit_based': '実力主義',
+  'casual': 'カジュアル',
+  'formal': 'フォーマル',
+  'customer_first': '顧客第一',
+  'product_first': 'プロダクト第一',
+  
+  // Size
+  'large': '大企業',
+  'small': 'ベンチャー',
+  'brand': 'ブランド重視',
+  'nonbrand': 'ブランド不問',
+  
+  // Global
+  'global': 'グローバル',
+  'domestic_only': '国内のみ',
+  
+  // Mission
+  'social_impact': '社会貢献',
+  'business_focus': 'ビジネス重視',
+  
+  // Function
+  'product': 'プロダクト開発',
+  'sales': '営業・対人',
+  'creative': 'クリエイティブ',
+  'nonproduct': '非開発',
+  'nonsales': '非営業',
+  'noncreative': '非クリエイティブ',
+};
 
     // 類似度を計算してソート
-    final rankedAnimals = animals.map((animal) {
-      final similarity = animal.calculateSimilarity(userAnswers);
-      return MapEntry(animal, similarity);
+    final rankedCompanies = companies.map((company) {
+      final similarity = company.calculateSimilarity(userTags);
+      final topTags = company.getTopMatchTags(userTags, 2);
+      return MapEntry(company, {'similarity': similarity, 'topTags': topTags});
     }).toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+      ..sort((a, b) => (b.value['similarity'] as double)
+          .compareTo(a.value['similarity'] as double));
 
-    // 上位5つを取得
-    final topAnimals = rankedAnimals.take(5).toList();
+    final topMatch = rankedCompanies.first;
+    final topCompany = topMatch.key;
+    final topSimilarity = topMatch.value['similarity'] as double;
+    final topMatchTags = topMatch.value['topTags'] as List<String>;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.purple.shade600,
-              Colors.blue.shade600,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
+      backgroundColor: Colors.grey.shade50,
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            // ヘッダー
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SizedBox(height: 20),
                     const Text(
-                      'あなたにおすすめの\nペットランキング',
-                      textAlign: TextAlign.center,
+                      'あなたへのレコメンド',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        height: 1.4,
+                        color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '${userAnswers.length}個の質問に回答',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
+                    TextButton.icon(
+                      onPressed: () {
+                        ref.read(answersProvider.notifier).state = {};
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (context) => const HomeScreen(),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text(
+                        'やり直す',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.blue.shade600,
                       ),
                     ),
                   ],
                 ),
               ),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: topAnimals.length,
-                  itemBuilder: (context, index) {
-                    final entry = topAnimals[index];
-                    final animal = entry.key;
-                    final similarity = entry.value;
-                    final percentage = (similarity * 100).toInt();
-
-                    return _ResultCard(
-                      rank: index + 1,
-                      animal: animal,
-                      percentage: percentage,
-                    );
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    // 回答をリセットしてホーム画面に戻る
-                    ref.read(answersProvider.notifier).state = {};
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.purple.shade600,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 50,
-                      vertical: 18,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    elevation: 8,
-                  ),
-                  child: const Text(
-                    'もう一度診断する',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ResultCard extends StatelessWidget {
-  final int rank;
-  final Animal animal;
-  final int percentage;
-
-  const _ResultCard({
-    required this.rank,
-    required this.animal,
-    required this.percentage,
-  });
-
-  Color _getRankColor() {
-    switch (rank) {
-      case 1:
-        return Colors.amber.shade400;
-      case 2:
-        return Colors.grey.shade400;
-      case 3:
-        return Colors.orange.shade800;
-      default:
-        return Colors.blue.shade300;
-    }
-  }
-
-  IconData _getRankIcon() {
-    if (rank <= 3) {
-      return Icons.emoji_events;
-    }
-    return Icons.star;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
-          children: [
-            // ランク表示
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: _getRankColor(),
-                shape: BoxShape.circle,
-              ),
-              child: Stack(
-                children: [
-                  Center(
-                    child: Icon(
-                      _getRankIcon(),
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                  Center(
-                    child: Text(
-                      '$rank',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ),
-            const SizedBox(width: 16),
-            // 動物情報
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        animal.emoji,
-                        style: const TextStyle(fontSize: 28),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        animal.name,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+
+            // トップマッチカード
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.blue.shade100, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    animal.description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // マッチ度表示
-                  Row(
+                  child: Stack(
                     children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: LinearProgressIndicator(
-                            value: percentage / 100,
-                            minHeight: 8,
-                            backgroundColor: Colors.grey.shade200,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              _getRankColor(),
+                      // No.1バッジ
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.yellow.shade400,
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(18),
+                              bottomLeft: Radius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'No.1 Match',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Text(
-                        '$percentage%',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: _getRankColor(),
+
+                      Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.shade50,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          topCompany.industry,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.blue.shade700,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        topCompany.name,
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade600,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.blue.withOpacity(0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${(topSimilarity * 100).round()}%',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              topCompany.description,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                                height: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // マッチ理由
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'MATCH REASON',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey.shade500,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    topMatchTags.length >= 2
+                                        ? '「${tagNameMap[topMatchTags[0]]}」と「${tagNameMap[topMatchTags[1]]}」を重視するあなたに最適です。'
+                                        : topMatchTags.isNotEmpty
+                                            ? '「${tagNameMap[topMatchTags[0]]}」を重視するあなたに最適です。'
+                                            : 'あなたの価値観に合った企業です。',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.blue.shade900,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // タグ表示
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: topCompany.tags.entries
+                                  .where((e) => e.value >= 4)
+                                  .take(4)
+                                  .map((e) => Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.grey.shade300,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          '#${tagNameMap[e.key] ?? e.key}',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
+            ),
+
+            // その他の候補
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+                child: Text(
+                  'その他の候補',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ),
+            ),
+
+            // その他の企業リスト
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final entry = rankedCompanies[index + 1];
+                  final company = entry.key;
+                  final similarity = entry.value['similarity'] as double;
+                  final percentage = (similarity * 100).round();
+
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${index + 2}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    company.name,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'マッチ度 $percentage%',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.blue.shade600,
+                                        ),
+                                      ),
+                                      Text(
+                                        ' | ${company.industry}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              Icons.chevron_right,
+                              color: Colors.grey.shade300,
+                              size: 24,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                childCount: rankedCompanies.length > 5 ? 4 : rankedCompanies.length - 1,
+              ),
+            ),
+
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 32),
             ),
           ],
         ),
